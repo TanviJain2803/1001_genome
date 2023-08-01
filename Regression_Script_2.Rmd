@@ -1,0 +1,239 @@
+
+### Pearson Correlation Analysis (Tanvi)
+
+# Pseudo-Bulking Each Cluster
+```{r}
+# Load Data Set
+#setwd("~/Desktop/Salk/Project - 1001 Genomes/R Files")
+#load("L1_Genomes_Cluster_Shoot.RData")
+load("/Users/tanvijain/Documents/EckerLab/L0_Genomes_Cluster_subsample.RData")
+Genomes_Cluster<-Genomes_Cluster_subsample
+remove(Genomes_Cluster_subsample)
+
+# Pseudo Bulk 
+DefaultAssay(object = Genomes_Cluster) <- "RNA" 
+num_clusters <- 18
+Pseudobulk_df_list <- list(NA)
+#for-loop iterates over each cluster, puts each pseudobulk df created into list
+for (cluster in 0:num_clusters) {
+  Genomes_Shoot_Subcluster <- Genomes_Cluster[,WhichCells(Genomes_Cluster, idents = c(cluster))] # specificy which cluster you want to pseudobulk
+  #DefaultAssay(object = Genomes_Shoot_Subcluster) <- "RNA" 
+  Genomes_Shoot_Subcluster$ecotypes<-substr(colnames(Genomes_Shoot_Subcluster),1,4) # need to indicate the ecotypes to bulk by
+  Idents(Genomes_Shoot_Subcluster)<-Genomes_Shoot_Subcluster$ecotypes
+  Genomes_Shoot_Subcluster_Pseudobulk<-as.data.frame((AggregateExpression(object = Genomes_Shoot_Subcluster, slot = "counts", group.by = "ecotypes"))[[1]])
+  Pseudobulk_df_list[[cluster+1]]<-Genomes_Shoot_Subcluster_Pseudobulk}
+
+length(Pseudobulk_df_list) #checking for number of clusters pseudobulked
+hist(log(rowSums(Pseudobulk_df_list[[1]]),2), breaks = 500) #checking distribution of clusters
+
+# Filter Based of Thresholds 
+rowSum_threshold <- 64
+colSum_threshold <- 1000
+Pseudobulk_df_list_filtered <- list(NA)
+for (cluster in 0:num_clusters){
+  chosen_cluster<-Pseudobulk_df_list[[cluster+1]]
+  chosen_cluster <- chosen_cluster %>% filter(rowSums(chosen_cluster)>=rowSum_threshold)
+  chosen_cluster <- chosen_cluster[,colSums(chosen_cluster)>colSum_threshold]
+  Pseudobulk_df_list_filtered[[cluster+1]] <- chosen_cluster}
+
+#checking distribution again
+hist(log(rowSums(Pseudobulk_df_list_filtered[[1]]),2), breaks = 500)
+dim(Pseudobulk_df_list_filtered[[1]])
+
+# Normalizing 
+Pseudobulk_df_list_normalised <- list(NA)
+for (cluster in 0:num_clusters){
+  chosen_cluster <- Pseudobulk_df_list_filtered[[cluster+1]]
+  chosen_cluster <- betweenLaneNormalization(as.matrix(chosen_cluster), which="full",offset=FALSE, round=TRUE)
+  Pseudobulk_df_list_normalised[[cluster+1]] <- chosen_cluster}
+
+```
+```{r}
+# Assess Dimensions 
+num_genes <- c()
+num_ecotypes <- c()
+
+for (cluster in 0:num_clusters){
+  chosen_cluster <- Pseudobulk_df_list_filtered[[cluster+1]]
+  num_genes[cluster+1] <- nrow(chosen_cluster)
+  num_ecotypes[cluster+1] <- ncol(chosen_cluster)}
+
+Cluster_dims <- data.frame(num_genes, num_ecotypes)
+Cluster_dims
+```
+
+# Regression - Calling R and P
+```{r}
+setwd("/Users/tanvijain/Documents/EckerLab/Phenotypes/")
+Latitude <- read.csv("Latitude_Pheno.csv")
+FloweringTime_Phenotype <- read.csv("FloweringTimePhenotype.csv")
+StomataDensity_Phenotype <- read.csv("StomataDensityPheno.csv")
+PlantDryWeight_Phenotype <- read.csv("PlantDryWeightPhenotype.csv")
+StomataSize_Phenotype <- read.csv("StomataSizePheno.csv")
+ZincConc_Phenotype <- read.csv("ZincConcentrationPhenotype.csv") #doesn't work 
+RootGrowthRateC_Phenotype <- read.csv("P2RootGrowthControl_Phenotype.csv")
+RootGrowthRateABA_Phenotype <- read.csv("P2RootGrowthABA_Phenotype.csv")
+SurvivalFruitTLP_Phenotype <- read.csv("rSurvivalFruitTlp_Phenotype.csv") #relative survival to reproduction (proportion of plants or 1/0 alive/dead) in Tuebingen low precipitation treatment and population (high density) replicate
+Mean_P2_ABA <- read.csv("Mean_P2_ABA.csv")
+Mean_TRL_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/359/values.csv")
+Mean_TLRL_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/358/values.csv")
+Mean_R_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/352/values.csv")
+Mean_P2_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/355/values.csv")
+
+Mean_LRR_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/360/values.csv")
+Mean_LRL_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/353/values.csv")
+Mean_LRDR_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/357/values.csv")
+Mean_LRDP_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/356/values.csv")
+Mean_LRno_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/354/values.csv")
+
+```
+```{r}
+for (accession in Mean_P2_ABA$accession_id){
+  if (sum(is.na.data.frame(Mean_P2_C[accession,]))==0){
+    difference = Mean_P2_ABA[accession, 'phenotype_value'] - Mean_P2_C[accession, 'phenotype_value']
+    Mean_P2_ABA[accession, 'phenotype_value'] <- difference
+  } else {
+    Mean_P2_ABA[accession, 'phenotype_value'] <- NA
+  }
+}
+Mean_P2_ABA <- Mean_P2_ABA[rowSums(is.na(Mean_P2_ABA)) != ncol(Mean_P2_ABA),]
+```
+
+```{r}
+# Input phenotype here
+Chosen_Phenotype<- FloweringTime_Phenotype
+
+
+# Subset Each Pseudo-Bulk Cluster By Phenotype Availability 
+Phenotype_List<-list(NA)
+Cluster_List<-list(NA)
+
+ for (i in 0:num_clusters){ 
+ 
+  chosen_cluster_df <- Pseudobulk_df_list_normalised[[i+1]]
+  
+  # Intersect
+  colnames(chosen_cluster_df) <- as.numeric(str_remove(colnames(chosen_cluster_df),"_"))
+  Common_Accessions <- intersect(Chosen_Phenotype[,2],colnames(chosen_cluster_df))
+  
+  # Filter
+  phenotype_mod <- Chosen_Phenotype[Chosen_Phenotype$accession_id %in% Common_Accessions,]  # filtering out accessions from phenotype df not found in our data
+  phenotype_mod <- phenotype_mod[order(phenotype_mod$accession_id, decreasing=FALSE),] # sorting accession ID in ascending order
+  phenotype_mod<- phenotype_mod[!duplicated(phenotype_mod$accession_id),] # if there are duplicate measurements, remove them
+  
+  cluster_mod <- chosen_cluster_df[,Common_Accessions]
+  cluster_mod <- cluster_mod[, order(as.integer(colnames(cluster_mod)))]
+
+  Phenotype_List[[i+1]] <- phenotype_mod
+  Cluster_List[[i+1]]   <- cluster_mod  }
+  
+# Get Regression and p-value
+regression_df_list <- list(NA)
+
+
+for (b in 0:num_clusters){
+  print(b)
+  phenotype_mod <- Phenotype_List[[b+1]]
+  cluster_mod <- Cluster_List[[b+1]]
+  print(summary(phenotype_mod$accession_id == as.numeric(colnames(cluster_mod)))) # just check all aligned, cause if not we have massive problems!
+  r_val<-NA
+  p_val<-NA
+  for (a in 1:nrow(cluster_mod)){
+    ####
+    if (sum(cluster_mod[a,])==0){
+      r_val[a] <- 0
+      next
+    }
+    ####
+    r_val[a] <- as.numeric(cor.test(as.numeric(cluster_mod[a,]),phenotype_mod$phenotype_value)[4])} #put logistic reg here
+  for (a in 1:nrow(cluster_mod)){ 
+    ####
+    if (sum(cluster_mod[a,])==0){
+      p_val[a] <- NA
+      next
+    }
+    p_val[a] <- as.numeric(cor.test(as.numeric(cluster_mod[a,]),phenotype_mod$phenotype_value)[3])}
+
+  output<-as.data.frame(cbind(r_val,p.adjust(p_val)))
+  output[,3]<-rownames(cluster_mod)
+  colnames(output)<-c("R_value","P_adj","Gene")
+  rownames(output)<-output$Gene
+  output<-subset(output, output$P_adj<0.01)
+  regression_df_list[[b+1]]<-output }
+```
+
+# Regression - Consolidating Clusters into Matrix
+```{r}
+# creating a list of all genes in all clusters to make common table
+union_genes<-NA
+for (i in 0:num_clusters) {union_genes<-c(union_genes,regression_df_list[[i+1]][,3])}
+union_genes<-unique(union_genes[-1])
+
+consolidated_matrix<-matrix(NA, nrow  = length(union_genes), ncol = num_clusters+1)
+rownames(consolidated_matrix)<-union_genes
+colnames(consolidated_matrix)<-c(0:num_clusters)
+
+for (a in 1:length(consolidated_matrix[1,])){
+cluster_chosen<-regression_df_list[[a]]
+for (i in 1:length(consolidated_matrix[,1])) { consolidated_matrix[i,a]<- ifelse(rownames(consolidated_matrix)[i] %in% cluster_chosen$Gene, cluster_chosen[rownames(consolidated_matrix)[i],1], NA) }}
+```
+
+# Heatmap 
+```{r}
+#creating heatmap after subsetting genes
+my_palette <- colorRampPalette(c("blue", "black", "yellow"))(n = 100)
+to_heatmap <- consolidated_matrix
+to_heatmap [is.na(to_heatmap )]<-0
+to_heatmap <-as.matrix(to_heatmap )
+if (nrow(consolidated_matrix)>=2){
+heatmap.2(to_heatmap , Rowv=as.dendrogram(hclust(as.dist(1-cor(t(to_heatmap ), method="pearson")), method="complete")), 
+          Colv=NA,dendrogram="row", scale="none", col=my_palette, tracecol=NA,margins = c(8, 16))
+} else{
+  consolidated_matrix
+}
+cat(noquote(rownames(consolidated_matrix)),fill=TRUE)
+```
+
+# Scatterplot (updated)
+```{r}
+# Scatter plot for each gene
+gene <- 'AT1G61140'
+cluster_num <- 8
+Phenotype_name <- "rSurvival_tlp_Phenotype"
+chosen_cluster_df <- Pseudobulk_df_list_normalised[[cluster_num]] # choose cluster
+phenotype_df <- Chosen_Phenotype # phenotype defined above
+colnames(chosen_cluster_df) <- as.numeric(str_remove(colnames(chosen_cluster_df),"_"))
+  Common_Accessions <- intersect(Chosen_Phenotype[,2],colnames(chosen_cluster_df))
+  
+  # Filter
+  phenotype_mod <- Chosen_Phenotype[Chosen_Phenotype$accession_id %in% Common_Accessions,]  # filtering out accessions from phenotype df not found in our data
+  phenotype_mod <- phenotype_mod[order(phenotype_mod$accession_id, decreasing=FALSE),] # sorting accession ID in ascending order
+  phenotype_mod<- phenotype_mod[!duplicated(phenotype_mod$accession_id),] # if there are duplicate measurements, remove them
+  
+  cluster_mod <- chosen_cluster_df[,Common_Accessions]
+  cluster_mod <- cluster_mod[, order(as.integer(colnames(cluster_mod)))]
+phenotype_val <- as.vector(phenotype_mod$phenotype_value)
+gene_expression <- cluster_mod[gene,]
+gene_expression <- as.numeric(gene_expression)
+plot(phenotype_val, gene_expression, main = paste(gene, Phenotype_name, cluster_num)) + abline(lm(gene_expression~phenotype_val))
+```
+#summary
+```{r}
+Phenotype_name <- "Mean_LRL_C"
+# Step 1: Call the pdf command to start the plot
+pdf(file = paste0("/Users/tanvijain/Documents/EckerLab/Regression_Summary/",Phenotype_name),   # The directory you want to save the file in
+    width = 4, # The width of the plot in inches
+    height = 4) # The height of the plot in inches
+
+# Step 2: Create the plot with R code
+if (nrow(consolidated_matrix)>=2){
+  print(heatmap.2(to_heatmap , Rowv=as.dendrogram(hclust(as.dist(1-cor(t(to_heatmap ), method="pearson")), method="complete")), 
+          Colv=NA,dendrogram="row", scale="none", col=my_palette, tracecol=NA,margins = c(8, 16)))
+}
+print(rownames(consolidated_matrix))
+# Step 3: Run dev.off() to create the file!
+dev.off()
+
+```
+
+
