@@ -1,6 +1,54 @@
 
-### Pearson Correlation Analysis (Tanvi)
+### Pearson Correlation Analysis 
+Using pseudobulk on Seurat Cluster to form gene x accession matrices for each cluster. We also import phenotype metadata (accessions and their respective phenotype val). Then using linear pearson correlation R values and its respective adj p values to filter it out.
 
+Since scatterplots look very 0 inflated, and most heatmaps show positve r-vals, we are suspecting we need to try out a different kind of normalisation (LMM) that might improve the results. There are not a lot of cell specific genes showing up through this pipeline compared to the XGB ML model. We tried Logit regression as well, however
+Flowering Time, Plant Dry Weight, and Lattitude shows good results
+
+Heatmap Examples and Work related to pipeline can be found here:
+https://docs.google.com/presentation/d/1PbmYhv_nslxEZFPF7JLtSIL2ANF63-WbFdWRNgYipP4/edit?usp=sharing
+
+Pseudocode:
+1. Load seurat cluster
+2. for each cluster:
+3.    Pseudobulk by ecotype
+4.    save in pseudobulk_df_list
+5. Set thresholds to resemble normalised distribution
+6. for each cluster:
+7.    Filter according to threshold
+8.    save in pseudobulk_df_list_filtered
+9. for each cluster:
+10.   Normalise
+11.   save in pseudobulk_df_list_normalised
+12. Import phenotype df from 1001 genomes
+13. for each cluster:
+14.     list of common accessions between cluster matrix and phenotype df, align and filter out accessions with each other
+15.     save filtered accession phenotype and cluster matrices to Phenotype_list and Cluster_list respectively
+16. for each cluster:
+17.     take mod phenotype list and mod cluster list
+18.     for each gene in cluster matrix:
+19.           calculate r val and store it in vector r_val
+20.     for each gene in cluster matrix:
+21.           calculate p val and store it in vector p_val
+22.     create df cbind(gene, r_vals, adj_p_vals)
+23.     subset df by adj_pval <0.01 save into regression_df_list
+24. create a consolidated matrix by finding out union genes of all genes in regression_df_list (clusters x ) if cluster does not have significant corr with     gene fill cell as NA
+25. Create heatmap using consolidated matrix
+
+Pipeline includes:
+- calculating number of genes and ecotypes in each cluster
+- creating scatterplots with linear regression visualisation for any gene in any cluster (each point is an ecotype)
+  notes: currently looks 0 inflated, which I suspect is why there are more positive correlations than negative correlations (maybe LMM normalisation will fix this)
+- calculating % of cell specific genes in each cluster (can print out lists of the cell specific genes and further analyse in virtual plant)
+#Importing Libraries
+```{r}
+library(Seurat)
+library(tidyverse)
+library(RColorBrewer)
+library(EDASeq)
+library(gplots)
+library(reshape2)
+```
 # Pseudo-Bulking Each Cluster
 ```{r}
 # Load Data Set
@@ -64,6 +112,7 @@ Cluster_dims
 
 # Regression - Calling R and P
 ```{r}
+#can access google sheet with links to all phenotypes here: https://docs.google.com/spreadsheets/d/1J2yd9iQaU8BcKkSKplbYVYeoX4OHkqAH5jX0_Hf8JhE/edit?usp=sharing
 setwd("/Users/tanvijain/Documents/EckerLab/Phenotypes/")
 Latitude <- read.csv("Latitude_Pheno.csv")
 FloweringTime_Phenotype <- read.csv("FloweringTimePhenotype.csv")
@@ -88,6 +137,7 @@ Mean_LRno_C <- read.csv("https://arapheno.1001genomes.org/rest/phenotype/354/val
 
 ```
 ```{r}
+#calculating the difference between Mean_P2_ABA and control
 for (accession in Mean_P2_ABA$accession_id){
   if (sum(is.na.data.frame(Mean_P2_C[accession,]))==0){
     difference = Mean_P2_ABA[accession, 'phenotype_value'] - Mean_P2_C[accession, 'phenotype_value']
@@ -177,6 +227,9 @@ for (a in 1:length(consolidated_matrix[1,])){
 cluster_chosen<-regression_df_list[[a]]
 for (i in 1:length(consolidated_matrix[,1])) { consolidated_matrix[i,a]<- ifelse(rownames(consolidated_matrix)[i] %in% cluster_chosen$Gene, cluster_chosen[rownames(consolidated_matrix)[i],1], NA) }}
 ```
+```{r}
+head(consolidated_matrix)
+```
 
 # Heatmap 
 ```{r}
@@ -194,12 +247,13 @@ heatmap.2(to_heatmap , Rowv=as.dendrogram(hclust(as.dist(1-cor(t(to_heatmap ), m
 cat(noquote(rownames(consolidated_matrix)),fill=TRUE)
 ```
 
+
 # Scatterplot (updated)
 ```{r}
 # Scatter plot for each gene
 gene <- 'AT1G61140'
 cluster_num <- 8
-Phenotype_name <- "rSurvival_tlp_Phenotype"
+Phenotype_name <- "FloweringTime_Phenotype"
 chosen_cluster_df <- Pseudobulk_df_list_normalised[[cluster_num]] # choose cluster
 phenotype_df <- Chosen_Phenotype # phenotype defined above
 colnames(chosen_cluster_df) <- as.numeric(str_remove(colnames(chosen_cluster_df),"_"))
@@ -217,23 +271,35 @@ gene_expression <- cluster_mod[gene,]
 gene_expression <- as.numeric(gene_expression)
 plot(phenotype_val, gene_expression, main = paste(gene, Phenotype_name, cluster_num)) + abline(lm(gene_expression~phenotype_val))
 ```
-#summary
+#calculating cell specific markers % per cluster
 ```{r}
-Phenotype_name <- "Mean_LRL_C"
-# Step 1: Call the pdf command to start the plot
-pdf(file = paste0("/Users/tanvijain/Documents/EckerLab/Regression_Summary/",Phenotype_name),   # The directory you want to save the file in
-    width = 4, # The width of the plot in inches
-    height = 4) # The height of the plot in inches
+#filtering out FindAllMarkers() genes using cell specificity and pval
+markers_table <- read.csv("/Users/tanvijain/Documents/EckerLab/FindAllMarkersTable.csv")
+markers_table[,8] <- markers_table$pct.1/markers_table$pct.2
+markers_table<-markers_table[order(markers_table$p_val_adj,decreasing = FALSE),]
+markers_table <- markers_table[(markers_table$gene>1.2) & (markers_table$p_val_adj<0.01),]
+markers_table[,1] <- substr(markers_table[,1], 1, 9)
+markers_table <- markers_table[markers_table$X %in% unique(markers_table[,1]),]
 
-# Step 2: Create the plot with R code
-if (nrow(consolidated_matrix)>=2){
-  print(heatmap.2(to_heatmap , Rowv=as.dendrogram(hclust(as.dist(1-cor(t(to_heatmap ), method="pearson")), method="complete")), 
-          Colv=NA,dendrogram="row", scale="none", col=my_palette, tracecol=NA,margins = c(8, 16)))
+melt_markers <- melt(markers_table[,c(1,7)], id="cluster")
+cell_specific_num <- matrix(NA, nrow=19, ncol=3)
+for (i in 1:19){
+  cell_specific_i <- melt_markers[melt_markers$cluster==i,3]
+  corr_gene_i <- rownames(consolidated_matrix[!is.na(consolidated_matrix[,i]),])
+  #overlapping genes between FindAllMarkers and consolidated matrix in each cluster
+  cell_specific_num[i,1] <- length(intersect(cell_specific_i,corr_gene_i))
+  cell_specific_num[i,2] <- sum(!is.na(consolidated_matrix[,i]))
+  cell_specific_num[i,3] <- cell_specific_num[i,1]/cell_specific_num[i,2]
 }
-print(rownames(consolidated_matrix))
-# Step 3: Run dev.off() to create the file!
-dev.off()
+colnames(cell_specific_num) <- c("num_cell_specific_genes","num_genes","cell_specific_%")
+
+#markers <- capture.output(cat(unique(markers), fill=FALSE, sep = "\n"))
+#writeLines(markers, "/Users/tanvijain/Documents/EckerLab/FindAllMarkersSorted.txt")
 
 ```
 
+
+```{r}
+cell_specific_num
+```
 
