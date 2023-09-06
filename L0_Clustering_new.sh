@@ -10,4 +10,6 @@
 
 cd /gale/ddn/ddn_neomorph/tjain
 
-Rscript L0_Clustering.R "$1"
+Rscript L0_Clustering.R
+
+
