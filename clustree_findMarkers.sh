@@ -8,6 +8,6 @@
 #$ -o output_log_file
 #$ -q gale.q
 
-cd /gale/ddn/ddn_neomorph/tjain
+cd /gale/ddn/ddn_neomorph/tjain/1001_genome
 
 Rscript clustree_findMarkers.R "$1"
