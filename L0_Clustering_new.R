@@ -104,7 +104,7 @@ Genomes_Cluster_integrated <- ScaleData(object = Genomes_Cluster_integrated, var
 Genomes_Cluster_integrated <- RunPCA(object = Genomes_Cluster_integrated, npcs = 30, verbose = FALSE)
 Genomes_Cluster_integrated <- RunUMAP(object = Genomes_Cluster_integrated, reduction = "pca", dims = 1:30)
 Genomes_Cluster_integrated <- FindNeighbors(object = Genomes_Cluster_integrated, reduction = "pca", dims = 1:30)
-Genomes_Cluster_integrated <- FindClusters(Genomes_Cluster_integrated, resolution = c(0,0.01,0.02,0.025, 0.05, 0.1,0.2,0.5,0.6,0.75,0.8,0.85,1.0))
+Genomes_Cluster_integrated <- FindClusters(Genomes_Cluster_integrated, resolution = c(0,0.05,0.1,0.2,0.5,0.6,0.75,1.0))
 # if change here, change below!
 Genomes_Cluster_integrated <- RunTSNE(object = Genomes_Cluster_integrated, reduction = "pca", dims = 1:30)
 save(Genomes_Cluster_integrated, file = "L0_Genomes_Cluster_integrated.RData")
@@ -115,30 +115,13 @@ Genomes_Cluster_merged[['tsne']] <- Genomes_Cluster_integrated[['tsne']]
 Genomes_Cluster_merged[['integrated']] <- Genomes_Cluster_integrated[['integrated']]
 Genomes_Cluster_merged@meta.data$seurat_clusters <- Genomes_Cluster_integrated@meta.data$seurat_clusters
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0
-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.01 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.01
-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.02 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.02
-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.025 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.025
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.05 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.05
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.1 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.1
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.2 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.2
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.5 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.5
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.6 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.6
 Genomes_Cluster_merged@meta.data$integrated_snn_res.0.75 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.75
-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.8 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.8
-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.85 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.0.85
 Genomes_Cluster_merged@meta.data$integrated_snn_res.1 <- Genomes_Cluster_integrated@meta.data$integrated_snn_res.1
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.01
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.02
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.025
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.05
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.1
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.2
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.5
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.6
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.75
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.8
-Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.0.85
 Idents(Genomes_Cluster_merged)<-Genomes_Cluster_merged@meta.data$integrated_snn_res.1
 table(Idents(Genomes_Cluster_merged))
 Genomes_Cluster_merged<-Genomes_Cluster_merged[,WhichCells(Genomes_Cluster_merged, idents = c(0:19))]  # remove tiny clusters
@@ -146,22 +129,9 @@ Genomes_Cluster<-Genomes_Cluster_merged
 
 # Save
 jpeg('cluster.jpg')
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.01
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.02
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.025
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.05
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.1
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.2
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.5
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.6
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.75
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.8
-Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.85
 Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.1
 plot(DimPlot(object = Genomes_Cluster, reduction = "tsne", label = TRUE))
-save(Genomes_Cluster, file = "L0_Genomes_Cluster.RData")
-jpeg('cluster_res.jpg')
-plot(DimPlot(object = Genomes_Cluster, group.by=c("integrated_snn_res.0","integrated_snn_res.0.01","integrated_snn_res.0.02","integrated_snn_res.0.025","integrated_snn_res.0.05","integrated_snn_res.0.1","integrated_snn_res.0.2","integrated_snn_res.0.5","integrated_snn_res.0.6","integrated_snn_res.0.75","integrated_snn_res.0.8","integrated_snn_res.0.85","integrated_snn_res.1"), reduction = "umap", label = TRUE, pt.size = 0.05, raster=FALSE))
+dev.off()
+save(Genomes_Cluster, file = "/gale/ddn/ddn_neomorph/tjain/L0_Genomes_Cluster.RData")
 Genomes_Cluster_subsample <- Genomes_Cluster[, sample(colnames(Genomes_Cluster), replace=FALSE)]
-save(Genomes_Cluster_subsample, file = "L0_Genomes_Cluster_subsample.RData")
+save(Genomes_Cluster_subsample, file = "/gale/ddn/ddn_neomorph/tjain/L0_Genomes_Cluster_subsample.RData")
