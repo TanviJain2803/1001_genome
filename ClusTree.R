@@ -33,6 +33,9 @@ Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.02
 Genomes_Cluster[['run2.2_root']] <- NULL #deleting previous run2.2_root metadata column
 Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.0.02
 
+#save new data obj
+save(Genomes_Cluster, file = "/gale/ddn/ddn_neomorph/tjain/L0_Genomes_Cluster_split_res.RData")
+
 #creating UMAP with initial manual res split
 jpeg(file="/gale/ddn/ddn_neomorph/tjain/root_shoot_split_UMAP.jpeg")
 DimPlot(object = Genomes_Cluster, reduction = "umap", label=TRUE, raster=TRUE)
