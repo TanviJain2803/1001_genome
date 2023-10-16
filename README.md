@@ -36,5 +36,14 @@ Pipeline includes:
   notes: currently looks 0 inflated, which I suspect is why there are more positive correlations than negative correlations (maybe LMM normalisation will fix this)
 - calculating % of cell specific genes in each cluster (can print out lists of the cell specific genes and further analyse in virtual plant)
 
+## ClusTree Pipeline
+Creating a clustering hierarchy tree using [MRTree package](https://htmlpreview.github.io/?https://github.com/pengminshi/MRtree/blob/master/vignettes/MRtree-tutorial.html). The tree uses multiple resolutions where the first resolution is 0 (all nuclei), and then a manually forced split into root and shoot (explained further below), and other findCluster() resolutions with the final resolution being 1 (leaf nodes).
+The pipeline will output the following:
+- New .RData seurat obj with manual included resolution saved as 'integrated_snn_res.0.02'
+- UMAP .jpeg of the manual split
+- ClusTree .jpeg showing hierarchy of clusters with their respective pie charts
 
+Note about manual resolution split: We used our run2.2 nuclei and some 10x root nuclei (overlapped it). We found out what nuclei in run2.2 is root, then we imported the colnames of run2.2 nuclei into the `Genomes_Cluster` obj. We used "integrated_snn_res.1" to see what clusters have run2.2 root nuclei. If a cluster has run2.2 root nuclei, it is classified as a root cluster. The first split in the clustree is then manually forced to be split into root and shoot using the biological truth. We then verified if the latter cluster is shoot using photosynthetic markers on a heatmap:
+<img width="863" alt="Screenshot 2023-10-16 at 1 58 31 PM" src="https://github.com/TanviJain2803/1001_genome/assets/73011639/556e285a-32c6-4bb4-8cb9-d8eeebec8451">
+Since the heatmap gives us promising results, we are confident in the manual splitting of the initial resolution
 
