@@ -128,7 +128,7 @@ Genomes_Cluster_merged<-Genomes_Cluster_merged[,WhichCells(Genomes_Cluster_merge
 Genomes_Cluster<-Genomes_Cluster_merged
 
 # Save
-jpeg('cluster.jpg')
+jpeg('/gale/ddn/ddn_neomorph/tjain/cluster_new.jpg')
 Idents(Genomes_Cluster)<- Genomes_Cluster@meta.data$integrated_snn_res.1
 plot(DimPlot(object = Genomes_Cluster, reduction = "tsne", label = TRUE))
 dev.off()
