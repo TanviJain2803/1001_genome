@@ -10,4 +10,4 @@
 
 cd /gale/ddn/ddn_neomorph/tjain/1001_genome
 
-Rscript clustree_findMarkers.R "$1"
+Rscript ClusTree.R
