@@ -17,58 +17,92 @@ Read_Cluster<-function(path, Run_Number) {
   Genomes_Cluster <- RunPCA(object = Genomes_Cluster, npcs = 30, verbose = FALSE)
   Genomes_Cluster}
 
+print("start")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_1/CI_Run_1_full_matrix.RData")
 Genomes_Cluster_Run_1<-Read_Cluster(full_matrix, "Run_1")
 Genomes_Cluster_Run_1
 
+print("run_1")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_3/CI_Run_3_full_matrix.RData")
 Genomes_Cluster_Run_3<-Read_Cluster(full_matrix, "Run_3")
 Genomes_Cluster_Run_3
 
+print("run_3")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_4/CI_Run_4_full_matrix.RData")
 Genomes_Cluster_Run_4<-Read_Cluster(full_matrix, "Run_4")
 Genomes_Cluster_Run_4
 
+print("run_4")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_5/CI_Run_5_full_matrix.RData")
 Genomes_Cluster_Run_5<-Read_Cluster(full_matrix, "Run_5")
 Genomes_Cluster_Run_5
 
+print("run_5")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_6/CI_Run_6_full_matrix.RData")
 Genomes_Cluster_Run_6<-Read_Cluster(full_matrix, "Run_6")
 Genomes_Cluster_Run_6
 
+print("run_6")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_7/CI_Run_7_full_matrix.RData")
 Genomes_Cluster_Run_7<-Read_Cluster(full_matrix, "Run_7")
 Genomes_Cluster_Run_7
 
+print("run_7")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_8/CI_Run_8_full_matrix.RData")
 Genomes_Cluster_Run_8<-Read_Cluster(full_matrix, "Run_8")
 Genomes_Cluster_Run_8
 
+print("run_8")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_9/CI_Run_9_full_matrix.RData")
 Genomes_Cluster_Run_9<-Read_Cluster(full_matrix, "Run_9")
 Genomes_Cluster_Run_9
 
+print("run_9")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_1.2/CI_Run_1.2_full_matrix.RData")
 Genomes_Cluster_Run_1.2<-Read_Cluster(full_matrix, "Run_1.2")
 Genomes_Cluster_Run_1.2
 
+print("run_1.2")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_2.2/CI_Run_2.2_full_matrix.RData")
 Genomes_Cluster_Run_2.2<-Read_Cluster(full_matrix, "Run_2.2")
 Genomes_Cluster_Run_2.2
 
+print("run_2.2")
 load("/gale/netapp/home/jswift/analysis/CI_1001/1001_combo_indexing_run_3.2/CI_Run_3.2_full_matrix.RData")
 Genomes_Cluster_Run_3.2<-Read_Cluster(full_matrix, "Run_3.2")
 Genomes_Cluster_Run_3.2
-print("done with load in")
 
+print("run3.2")
+load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_4.2_full_matrix.RData")
+Genomes_Cluster_Run_4.2<-Read_Cluster(full_matrix,"Run_4.2")
+Genomes_Cluster_Run_4.2
+
+load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_5.2_full_matrix.RData")
+Genomes_Cluster_Run_5.2<-Read_Cluster(full_matrix,"Run_5.2")
+Genomes_Cluster_Run_5.2
+
+
+load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_6.2_full_matrix.RData")
+Genomes_Cluster_Run_6.2<-Read_Cluster(full_matrix,"Run_6.2")
+Genomes_Cluster_Run_6.2
+
+load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_7.2_full_matrix.RData")
+Genomes_Cluster_Run_7.2<-Read_Cluster(full_matrix,"Run_7.2")
+Genomes_Cluster_Run_7.2
+
+load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_8.2_full_matrix.RData")
+Genomes_Cluster_Run_7.2<-Read_Cluster(full_matrix,"Run_8.2")
+Genomes_Cluster_Run_8.2
+print("done with load")
 # Merge data
 Genomes_Cluster_merged <- merge(Genomes_Cluster_Run_1, y = c(Genomes_Cluster_Run_3,Genomes_Cluster_Run_4,Genomes_Cluster_Run_5,Genomes_Cluster_Run_6,
                                                              Genomes_Cluster_Run_7,Genomes_Cluster_Run_8,Genomes_Cluster_Run_9,Genomes_Cluster_Run_1.2,
-                                                             Genomes_Cluster_Run_2.2, Genomes_Cluster_Run_3.2))
+                                                             Genomes_Cluster_Run_2.2, Genomes_Cluster_Run_3.2,Genomes_Cluster_Run_4.2,Genomes_Cluster_Run_5.2,
+							     Genomes_Cluster_Run_6.2,Genomes_Cluster_Run_7.2,Genomes_Cluster_Run_8.2))
+print("checkpoint_1")
 Genomes_Cluster_merged <- NormalizeData(object = Genomes_Cluster_merged, verbose = FALSE)
 Genomes_Cluster_merged <- FindVariableFeatures(object = Genomes_Cluster_merged , selection.method = "vst", nfeatures = 2000)
-save(Genomes_Cluster_merged, file = "L0_Genomes_Cluster_merged.RData")
+save(Genomes_Cluster_merged, file = "/gale/ddn/ddn_neomorph/tjain/L0_Genomes_Cluster_merged.RData")
 
 # Subset by variable features
 Variable_Features<-VariableFeatures(Genomes_Cluster_merged)
@@ -84,16 +118,19 @@ Genomes_Cluster_Run_9<-Genomes_Cluster_Run_9[Variable_Features,]
 Genomes_Cluster_Run_1.2<-Genomes_Cluster_Run_1.2[Variable_Features,]
 Genomes_Cluster_Run_2.2<-Genomes_Cluster_Run_2.2[Variable_Features,]
 Genomes_Cluster_Run_3.2<-Genomes_Cluster_Run_3.2[Variable_Features,]
-
-
+Genomes_Cluster_Run_4.2<-Genomes_Cluster_Run_4.2[Variable_Features,]
+Genomes_Cluster_Run_5.2<-Genomes_Cluster_Run_5.2[Variable_Features,]
+Genomes_Cluster_Run_6.2<-Genomes_Cluster_Run_6.2[Variable_Features,]
+Genomes_Cluster_Run_7.2<-Genomes_Cluster_Run_7.2[Variable_Features,]
+Genomes_Cluster_Run_8.2<-Genomes_Cluster_Run_8.2[Variable_Features,]
 # Integrate
 plant_anchors <- FindIntegrationAnchors(object.list = list(Genomes_Cluster_Run_1, Genomes_Cluster_Run_3, Genomes_Cluster_Run_4,
                                                            Genomes_Cluster_Run_5, Genomes_Cluster_Run_6, Genomes_Cluster_Run_7,
                                                            Genomes_Cluster_Run_8, Genomes_Cluster_Run_9, Genomes_Cluster_Run_1.2,
-                                                           Genomes_Cluster_Run_2.2, Genomes_Cluster_Run_3.2), reference= c(10), dims = 1:30, reduction = "rpca")
+                                                           Genomes_Cluster_Run_2.2, Genomes_Cluster_Run_3.2,Genomes_Cluster_Run_4.2,
+							   Genomes_Cluster_Run_5.2,Genomes_Cluster_Run_6.2,Genomes_Cluster_Run_7.2,Genomes_Cluster_Run_8.2), reference= c(10), dims = 1:30, reduction = "rpca")
 
-remove(Genomes_Cluster_Run_1, Genomes_Cluster_Run_3, Genomes_Cluster_Run_4, Genomes_Cluster_Run_5, Genomes_Cluster_Run_6,Genomes_Cluster_Run_7,Genomes_Cluster_Run_8, Genomes_Cluster_Run_9,Genomes_Cluster_Run_1.2,Genomes_Cluster_Run_2.2,
-       Genomes_Cluster_Run_3.2)
+remove(Genomes_Cluster_Run_1, Genomes_Cluster_Run_3, Genomes_Cluster_Run_4, Genomes_Cluster_Run_5, Genomes_Cluster_Run_6,Genomes_Cluster_Run_7,Genomes_Cluster_Run_8, Genomes_Cluster_Run_9,Genomes_Cluster_Run_1.2,Genomes_Cluster_Run_2.2,Genomes_Cluster_Run_3.2,Genomes_Cluster_Run_4.2,Genomes_Cluster_Run_5.2,Genomes_Cluster_Run_6.2,Genomes_Cluster_Run_7.2,Genomes_Cluster_Run_8.2)
 
 Genomes_Cluster_integrated <- IntegrateData(anchorset = plant_anchors, dims = 1:30)
 remove(plant_anchors)
