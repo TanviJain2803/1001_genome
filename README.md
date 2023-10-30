@@ -1,10 +1,6 @@
 # 1001_genome
 Ecker Lab Salk's 1001 genomes project pipelines
 
-## Overview
-[Click to view embedded content](https://TanviJain2803.github.io/1001_genome/lucid.html)
-
-
 ## XGB ML Classifier for Feature Selection Pipeline
 The pipeline attempts to select the genes associated with different phenotypes based on the varying transcriptomes of different accessions via Pseudobulking.   Here is the diagram representing the workflow:
 
