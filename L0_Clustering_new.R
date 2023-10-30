@@ -91,7 +91,7 @@ Genomes_Cluster_Run_7.2<-Read_Cluster(full_matrix,"Run_7.2")
 Genomes_Cluster_Run_7.2
 
 load("/gale/ddn/ddn_neomorph/tjain/full_matrix_files/CI_Run_8.2_full_matrix.RData")
-Genomes_Cluster_Run_7.2<-Read_Cluster(full_matrix,"Run_8.2")
+Genomes_Cluster_Run_8.2<-Read_Cluster(full_matrix,"Run_8.2")
 Genomes_Cluster_Run_8.2
 print("done with load")
 # Merge data
