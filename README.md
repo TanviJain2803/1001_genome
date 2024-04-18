@@ -1,5 +1,9 @@
 # 1001_genome
 Ecker Lab Salk's 1001 genomes project pipelines
+## Run Integration Pipeline 
+The pipeline integrates different run count matrices and performs pre-processing steps (QC Filtering, Normalisation, Scaling, Variable Feature Selection, Linear Dimension Reduction (PCA)) and then integrates the runs.
+
+<img width="563" alt="Screenshot 2023-08-16 at 4 16 45 PM" src="https://github.com/TanviJain2803/1001_genome/blob/main/Screenshot%202024-04-18%20at%204.45.30%20PM.png">
 
 ## XGB ML Classifier for Feature Selection Pipeline
 The pipeline attempts to select the genes associated with different phenotypes based on the varying transcriptomes of different accessions via Pseudobulking.   Here is the diagram representing the workflow:
@@ -23,6 +27,7 @@ When uploaded to virtual plant we see the following results:
 We hope to see more of an overlap between Linear Modelling genes and more quantity in ML classifier pipeline after working on the LMM normalization and getting more data. The pipeline has shown good progress because of higher % in cell type-specific genes, which people would be more interested in. We have tried logit regression but it didn't make sense because we converted the gene count into binary numbers rather than output, and Arthur recommended against it.
 
 ## Linear Regression Pipeline
+<img width="851" alt="Screenshot 2023-08-16 at 4 20 02 PM" src="https://github.com/TanviJain2803/1001_genome/blob/main/Screenshot%202024-04-18%20at%204.46.32%20PM.png">
 Using pseudobulk on Seurat Cluster to form gene x accession matrices for each cluster. We also import phenotype metadata (accessions and their respective phenotype val). Then using linear pearson correlation R values and its respective adj p values to filter it out.
 
 Since scatterplots look very 0 inflated, and most heatmaps show positve r-vals, we are suspecting we need to try out a different kind of normalisation (LMM) that might improve the results. There are not a lot of cell specific genes showing up through this pipeline compared to the XGB ML model. We tried Logit regression as well, however
@@ -37,6 +42,7 @@ Pipeline includes:
 - calculating % of cell specific genes in each cluster (can print out lists of the cell specific genes and further analyse in virtual plant)
 
 ## ClusTree Pipeline
+<img width="851" alt="Screenshot 2023-08-16 at 4 20 02 PM" src="https://github.com/TanviJain2803/1001_genome/blob/main/Screenshot%202024-04-18%20at%204.45.51%20PM.png">
 Creating a clustering hierarchy tree using [MRTree package](https://htmlpreview.github.io/?https://github.com/pengminshi/MRtree/blob/master/vignettes/MRtree-tutorial.html). The tree uses multiple resolutions where the first resolution is 0 (all nuclei), and then a manually forced split into root and shoot (explained further below), and other findCluster() resolutions with the final resolution being 1 (leaf nodes).
 The pipeline will output the following:
 - New .RData seurat obj with manual included resolution saved as 'integrated_snn_res.0.02'
