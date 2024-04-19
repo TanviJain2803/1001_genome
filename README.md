@@ -1,5 +1,14 @@
 # 1001_genome
-Ecker Lab Salk's 1001 genomes project pipelines
+Ecker Lab Salk's 1001 genomes project pipelines 
+
+
+The 1001 Genomes project is a collaborative database that presents a comprehensive collection of whole-genome sequences from over 1001 accessions or ecotypes of the reference plant Arabidopsis thaliana. This data offers a spectrum of genetic and phenotypic diversity of arabidopsis, opening avenues for extensive exploration. \
+At the Ecker Lab, we are building a 1001 Genome dataset to a single cell resolution. My primary research inquiry aims to explore the connections between gene expression patterns and specific phenotypes within distinct cell types of Arabidopsis. Addressing this question holds significance as it will not only enhance our comprehension of the relationship between cell types and phenotype but also has the potential to uncover crucial regulatory mechanisms within the context of plant development, adaptation, and responses to environmental stimuli.
+More information on the 1001 Genomes Collaborative project can be found [here](https://1001genomes.org/)
+
+## Lab Presentations
+- Project Debrief + Clustering analysis + Linear Regression Pipeline presentation can be found [here](https://docs.google.com/presentation/d/15_TUG_j7n7F7XbB6NzNo_Mnry9L66Qx0Rx_94nymkOg/edit?usp=sharing)
+- Project Debrief 2 + Wet Lab Workflow + Progress Updates + QC Optimisation Pipeline presentation can be found [here](https://docs.google.com/presentation/d/1R8Yn-lpiQqHgJAPi4vQClwj7IpXDpCbJKrpJmTsqXsc/edit?usp=sharing)
 ## Run Integration Pipeline 
 The pipeline integrates different run count matrices and performs pre-processing steps (QC Filtering, Normalisation, Scaling, Variable Feature Selection, Linear Dimension Reduction (PCA)) and then integrates the runs.
 
