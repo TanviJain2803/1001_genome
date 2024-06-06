@@ -9,6 +9,7 @@ More information on the 1001 Genomes Collaborative project can be found [here](h
 ## Lab Presentations
 - Project Debrief + Clustering analysis + Linear Regression Pipeline presentation can be found [here](https://docs.google.com/presentation/d/15_TUG_j7n7F7XbB6NzNo_Mnry9L66Qx0Rx_94nymkOg/edit?usp=sharing)
 - Project Debrief 2 + Wet Lab Workflow + Progress Updates + QC Optimisation Pipeline presentation can be found [here](https://docs.google.com/presentation/d/1R8Yn-lpiQqHgJAPi4vQClwj7IpXDpCbJKrpJmTsqXsc/edit?usp=sharing)
+- Project Debrief 3 + Seurat v5 Merging/Integration + UCSC Cell Browser vs Broad's Single Cell Portal Data Hosting can be found [here](https://docs.google.com/presentation/d/1gpn2H2-Ymcn5xX2Hn7b0CUfn-wcRVH27iHX0eveqElY/edit?usp=sharing)
 ## Run Integration Pipeline 
 The pipeline integrates different run count matrices and performs pre-processing steps (QC Filtering, Normalisation, Scaling, Variable Feature Selection, Linear Dimension Reduction (PCA)) and then integrates the runs.
 
